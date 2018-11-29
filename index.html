@@ -66,174 +66,57 @@
     d3.csv("movies.csv", function(csv) {
 		for(var i = 0; i < csv.length; ++i) {
 			//console.log(csv[i].genres);
-		}
-
-    var graph = document.getElementById('barchart');
-    var width = 700;
-    var height = 600;
-    var svg = d3.select(graph)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
-    var bars = svg.append('g');
-    var xScale = d3.scale.linear().range([0, width]);
-    var yScale = d3.scale.ordinal().rangeRoundBands([0, height], 0.3);
-    var yAxis = d3.svg.axis().scale(yScale).orient('left');
-    var color = 'red';
-    d3.select(graph)
-        .append('p')
-        .append('button')
-        .text('Filter Data')
-        .on('click', function() {
-            var value = cutoff.property("value");
-            bars.selectAll('.bar')
-                .filter(function(d) {
-                    return d.gross >= value;
-                })
-                .transition()
-                .duration(function(d) {
-                    return Math.random() * 1000;
-                })
-                .delay(function(d) {
-                    return d.gross;
-                })
-                .style('fill', color)
-                .attr('width', function(d) {
-                    return xScale(d.gross);
-                });
-            bars.selectAll('.bar')
-                .filter(function(d) {
-                    return d.gross < value;
-                })
-                .transition()
-                .duration(function(d) {
-                    return Math.random() * 1000;
-                })
-                .delay(function(d) {
-                    return d.gross;
-                })
-                .attr('width', function(d) {
-                    return 0;
-                });
-        });
-
-    d3.select(graph)
-        .append('p')
-        .append('button')
-        .text('Reset Filter')
-        .on('click', function() {
-            bars.selectAll('.bar')
-                .transition()
-                .duration(function(d) {
-                    return Math.random() * 1000;
-                })
-                .delay(function(d) {
-                    return d.gross;
-                })
-                .style('fill', 'steelblue')
-                .attr('width', function(d) {
-                    return xScale(d.gross);
-                });
-        });
-
-    var data = ["red", "green", "yellow"];
-    var select = d3.select(graph)
-    .append('p')
-    .append('select')
-    .attr('class','select')
-    .on('change',onchange)
-  
-  var options = select
-    .selectAll('option')
-      .data(data).enter()
-      .append('option')
-          .text(function (d) { return d; });
-  
-  function onchange() {
-      selectValue = d3.select('select').property('value')
-      color = selectValue;
-  };
-
-  d3.select(graph)
-  .append('p')
-  .append('text')
-  .text('Cutoff Value')
-  var cutoff = d3.select(graph)
-        .append('p')
-        .append('input')
-        .attr('type','text')
-        .attr('name','textInput')
-        .attr('value','0.05')
-
-
-    // D3 will grab all the data from "data.csv" and make it available
-    // to us in a callback function. It follows the form:
-    // 
-    // d3.csv('file_name.csv', accumulator, callback)
-    // 
-    // Where 'file_name.csv' - the name of the file to read
-    // accumulator - a method with parameter d that lets you pre-process
-    //               each row in the CSV. This affects the array of
-    //               rows in the function named 'callback'
-    //
-    // callback - a method with parameters error, data. Error contains
-    //            an error message if the data could not be found, or
-    //            was malformed. The 'data' parameter is an array of
-    //            rows returned after being processed by the accumulator.
-    d3.csv('movies.csv', function(d) {
-        d.movie_title = +d.movie_title;
-        return d;
-    }, function(error, data) {
-        // We now have the "massaged" CSV data in the 'data' variable.
-        
-        // We set the domain of the xScale. The domain includes 0 up to
-        // the maximum frequency in the dataset. This is because 
-        xScale.domain([0, d3.max(data, function(d) {
-            return d.gross;
-        })]);
-        yScale.domain(data.map(function(d) {
-            return d.movie_title;
-        }));
-
-        // Append the y-axis to the graph. the translate(20, 0) stuff
-        // shifts the axis 20 pixels from the left. This just helps us
-        // position stuff to where we want it to be.
-        bars.append('g')
-            .attr('class', 'y axis')
-            .attr('transform', 'translate(20, 0)')
-            // Call is a special method that lets us invoke a function
-            // (called 'yAxis' in this case) which creates the actual
-            // yAxis using D3.
-            .call(yAxis);
-
-        // Create the bars in the graph. First, select all '.bars' that
-        // currently exist, then load the data into them. enter() selects
-        // all the pieces of data and lets us operate on them.
-        bars.append('g')
-            .selectAll('.bar')
-            .data(data)
-            .enter()
-            .append('rect')
-            .attr('class', 'bar')
-            .attr('x', 30)
-            .attr('y', function(d) {
-                return yScale(d.movie_title);
-            })
-            .attr('width', function(d) {
-                // xScale will map any number and return a number
-                // within the output range we specified earlier.
-                return xScale(d.gross);
-            })
-            .attr('height', function(d) {
-                // Remember how we set the yScale to be an ordinal scale
-                // with bands from 0 to height? And then we set the domain 
-                // to contain all the letters in the alphabet? 
-                return yScale.rangeBand();
-            });
-    });
-
-					
+		}					
      });
+
+
+var margin = {top:0, right:0, bottom:20, left:50},
+    width  = 800,
+    height = 500;
+
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", "0 0 " + width + " " + height);
+// set the ranges
+var yScale = d3.scale.linear()
+    .range([height - margin.top - margin.bottom, 0]);
+
+var xScale = d3.scale.ordinal()
+    .rangeRoundBands([0, width - margin.right - margin.left], .1);
+          
+var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left");
+
+d3.csv("movies.csv", function(error, data){
+data = data.map(function(d){ 
+    d["movie_title"] = +d["movie_title"]; 
+    return d;
+});
+//yscale's domain is from zero to the maximum "Median Price" in your data
+yScale.domain([0, d3.max(data, function(d){ return d["gross"]; })]);
+
+//xscale is unique values in your data (Age Group, since they are all different)
+xScale.domain(data.map(function(d){ return d["movie_title"]; }));
+
+svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", function(d){ return xScale(d["movie_title"]); })
+    .attr("y", function(d){ return yScale(d["gross"]); })
+    .attr("height", function(d){ return height; })
+    .attr("width", function(d){ return xScale.rangeBand(); });
+});
 
 
   </script>
