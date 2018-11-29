@@ -74,15 +74,6 @@ var margin = {top: 20, right: 20, bottom: 70, left: 40},
     width = 1000 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
-
-var y = d3.scale.linear().range([0, height]);
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(10);
-
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -99,6 +90,15 @@ d3.csv("movies.csv", function(error, data) {
 	    }
 	    var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	    var grossExtent = d3.extent(data, function(row) { return row.gross; });
+
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .05).domain(data.map(function(d) { return d.movie_title; }));
+
+var y = d3.scale.linear().range([0, height]).domain([0, d3.max(data, function(d) { return d.gross; })]);
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+	.ticks(10);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -121,9 +121,8 @@ function onchange() {
 		.append('p')
 		.text(selectValue + ' is the last selected option.')
 };
- 
-  x.domain(data.map(function(d) { return d.movie_title; }));
-  y.domain([0, d3.max(data, function(d) { return d.gross; })]);
+
+//console.log(x.domain());
 
   svg.append("g")
       .attr("class", "x axis")
@@ -149,7 +148,7 @@ function onchange() {
       .data(data)
     .enter().append("rect")
       .style("fill", "steelblue")
-      .attr("x", function(d) { return x(d.movie_title); })
+      .attr("x", function(d) { console.log (x(d.movie_title)); return x(d.movie_title); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.gross); })
       .attr("height", function(d) { return height - y(d.gross); });
