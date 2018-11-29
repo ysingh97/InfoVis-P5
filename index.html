@@ -62,17 +62,13 @@
 		 <div id="barchart"></div>
    </div>
   <script>
-   
-	var width = 500;
-	var height= 500;
-
 
     d3.csv("movies.csv", function(csv) {
 		for(var i = 0; i < csv.length; ++i) {
-			console.log(csv[i].genres);
+			//console.log(csv[i].genres);
 		}
 
-    var graph = document.getElementById('graph');
+    var graph = document.getElementById('barchart');
     var width = 700;
     var height = 600;
     var svg = d3.select(graph)
@@ -92,29 +88,29 @@
             var value = cutoff.property("value");
             bars.selectAll('.bar')
                 .filter(function(d) {
-                    return d.frequency >= value;
+                    return d.gross >= value;
                 })
                 .transition()
                 .duration(function(d) {
                     return Math.random() * 1000;
                 })
                 .delay(function(d) {
-                    return d.frequency * 8000
+                    return d.gross;
                 })
                 .style('fill', color)
                 .attr('width', function(d) {
-                    return xScale(d.frequency);
+                    return xScale(d.gross);
                 });
             bars.selectAll('.bar')
                 .filter(function(d) {
-                    return d.frequency < value;
+                    return d.gross < value;
                 })
                 .transition()
                 .duration(function(d) {
                     return Math.random() * 1000;
                 })
                 .delay(function(d) {
-                    return d.frequency * 8000
+                    return d.gross;
                 })
                 .attr('width', function(d) {
                     return 0;
@@ -132,11 +128,11 @@
                     return Math.random() * 1000;
                 })
                 .delay(function(d) {
-                    return d.frequency * 8000
+                    return d.gross;
                 })
                 .style('fill', 'steelblue')
                 .attr('width', function(d) {
-                    return xScale(d.frequency);
+                    return xScale(d.gross);
                 });
         });
 
@@ -184,8 +180,8 @@
     //            an error message if the data could not be found, or
     //            was malformed. The 'data' parameter is an array of
     //            rows returned after being processed by the accumulator.
-    d3.csv('data.csv', function(d) {
-        d.frequency = +d.frequency;
+    d3.csv('movies.csv', function(d) {
+        d.movie_title = +d.movie_title;
         return d;
     }, function(error, data) {
         // We now have the "massaged" CSV data in the 'data' variable.
@@ -193,16 +189,10 @@
         // We set the domain of the xScale. The domain includes 0 up to
         // the maximum frequency in the dataset. This is because 
         xScale.domain([0, d3.max(data, function(d) {
-            return d.frequency;
+            return d.gross;
         })]);
-
-        // We set the domain of the yScale. The scale is ordinal, and
-        // contains every letter in the alphabet (the letter attribute
-        // in our data array). We can use the map function to iterate
-        // through each value in our data array, and make a new array
-        // that contains just letters.
         yScale.domain(data.map(function(d) {
-            return d.letter;
+            return d.movie_title;
         }));
 
         // Append the y-axis to the graph. the translate(20, 0) stuff
@@ -227,12 +217,12 @@
             .attr('class', 'bar')
             .attr('x', 30)
             .attr('y', function(d) {
-                return yScale(d.letter);
+                return yScale(d.movie_title);
             })
             .attr('width', function(d) {
                 // xScale will map any number and return a number
                 // within the output range we specified earlier.
-                return xScale(d.frequency);
+                return xScale(d.gross);
             })
             .attr('height', function(d) {
                 // Remember how we set the yScale to be an ordinal scale
