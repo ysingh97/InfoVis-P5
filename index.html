@@ -70,54 +70,91 @@
      });
 
 
-var margin = {top:0, right:0, bottom:20, left:50},
-    width  = 800,
-    height = 500;
+var margin = {top: 20, right: 20, bottom: 70, left: 40},
+    width = 1000 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-var svg = d3.select("body")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("viewBox", "0 0 " + width + " " + height);
-// set the ranges
-var yScale = d3.scale.linear()
-    .range([height - margin.top - margin.bottom, 0]);
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
 
-var xScale = d3.scale.ordinal()
-    .rangeRoundBands([0, width - margin.right - margin.left], .1);
-          
-var xAxis = d3.svg.axis()
-    .scale(xScale)
-    .orient("bottom");
+var y = d3.scale.linear().range([0, height]);
 
 var yAxis = d3.svg.axis()
-    .scale(yScale)
-    .orient("left");
+    .scale(y)
+    .orient("left")
+    .ticks(10);
 
-d3.csv("movies.csv", function(error, data){
-data = data.map(function(d){ 
-    d["movie_title"] = +d["movie_title"]; 
-    return d;
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", 
+		  "translate(" + margin.left + "," + margin.top + ")");
+
+
+d3.csv("movies.csv", function(error, data) {
+
+   for (var i=0; i<data.length; ++i) {
+			data[i].movie_title = data[i].movie_title;
+			data[i].gross = Number(data[i].gross);
+	    }
+	    var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
+	    var grossExtent = d3.extent(data, function(row) { return row.gross; });
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+	.orient("bottom");
+
+var select = d3.select('body')
+  .append('select')
+	.attr('class','select')
+	.on('change',onchange)
+
+var options = select
+  .selectAll('option')
+	.data(data.map(function(d) { return d.movie_title; })).enter()
+	.append('option')
+		.text(function (d) { return d; });
+
+function onchange() {
+	selectValue = d3.select('select').property('value')
+	d3.select('body')
+		.append('p')
+		.text(selectValue + ' is the last selected option.')
+};
+ 
+  x.domain(data.map(function(d) { return d.movie_title; }));
+  y.domain([0, d3.max(data, function(d) { return d.gross; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", "-.55em")
+      .attr("transform", "rotate(-90)" );
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Value ($)");
+
+  svg.selectAll("bar")
+      .data(data)
+    .enter().append("rect")
+      .style("fill", "steelblue")
+      .attr("x", function(d) { return x(d.movie_title); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.gross); })
+      .attr("height", function(d) { return height - y(d.gross); });
+
 });
-//yscale's domain is from zero to the maximum "Median Price" in your data
-yScale.domain([0, d3.max(data, function(d){ return d["gross"]; })]);
-
-//xscale is unique values in your data (Age Group, since they are all different)
-xScale.domain(data.map(function(d){ return d["movie_title"]; }));
-
-svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .selectAll(".bar")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", function(d){ return xScale(d["movie_title"]); })
-    .attr("y", function(d){ return yScale(d["gross"]); })
-    .attr("height", function(d){ return height; })
-    .attr("width", function(d){ return xScale.rangeBand(); });
-});
-
 
   </script>
   </body>
