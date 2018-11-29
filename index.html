@@ -59,20 +59,11 @@
    </head>
    <body>
    <div id="wrapper">
-	  <div id="chart1">
-           </div>
-	  <div id="chart2">
-          </div>
-	  <div id="chart3">
-                <strong>SATM Score:</strong> <span id="satm"></span><br/>
-                <strong>SATV Score:</strong> <span id="satv"></span><br/>
-                <strong>ACT Score:</strong> <span id="act"></span><br/>
-                <strong>GPA:</strong> <span id="gpa"></span><br/> 
-         </div>
+		 <div id="barchart"></div>
    </div>
   <script>
    
-	var width =500;
+	var width = 500;
 	var height= 500;
 
 
@@ -80,219 +71,178 @@
 		for(var i = 0; i < csv.length; ++i) {
 			console.log(csv[i].genres);
 		}
-		// for (var i=0; i<csv.length; ++i) {
-		// 	csv[i].GPA = Number(csv[i].GPA);
-		// 	csv[i].SATM = Number(csv[i].SATM);
-		// 	csv[i].SATV = Number(csv[i].SATV);
-		// 	csv[i].ACT = Number(csv[i].ACT);
-	    // }
-	    // var satmExtent = d3.extent(csv, function(row) { return row.SATM; });
-	    // var satvExtent = d3.extent(csv, function(row) { return row.SATV; });
-	    // var actExtent = d3.extent(csv,  function(row) { return row.ACT;  });
-	    // var gpaExtent = d3.extent(csv,  function(row) {return row.GPA;   });    
 
-	    
-	    // var satExtents = {
-		// "SATM": satmExtent,
-		// "SATV": satvExtent
-	    // }; 
-	   
+    var graph = document.getElementById('graph');
+    var width = 700;
+    var height = 600;
+    var svg = d3.select(graph)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+    var bars = svg.append('g');
+    var xScale = d3.scale.linear().range([0, width]);
+    var yScale = d3.scale.ordinal().rangeRoundBands([0, height], 0.3);
+    var yAxis = d3.svg.axis().scale(yScale).orient('left');
+    var color = 'red';
+    d3.select(graph)
+        .append('p')
+        .append('button')
+        .text('Filter Data')
+        .on('click', function() {
+            var value = cutoff.property("value");
+            bars.selectAll('.bar')
+                .filter(function(d) {
+                    return d.frequency >= value;
+                })
+                .transition()
+                .duration(function(d) {
+                    return Math.random() * 1000;
+                })
+                .delay(function(d) {
+                    return d.frequency * 8000
+                })
+                .style('fill', color)
+                .attr('width', function(d) {
+                    return xScale(d.frequency);
+                });
+            bars.selectAll('.bar')
+                .filter(function(d) {
+                    return d.frequency < value;
+                })
+                .transition()
+                .duration(function(d) {
+                    return Math.random() * 1000;
+                })
+                .delay(function(d) {
+                    return d.frequency * 8000
+                })
+                .attr('width', function(d) {
+                    return 0;
+                });
+        });
 
-	    // var xScale = d3.scale.linear().domain(satmExtent).range([50, 470]);
-	    // var yScale = d3.scale.linear().domain(satvExtent).range([470, 30]);
-	 
-	    // var xScale2 = d3.scale.linear().domain(actExtent).range([50, 470]);
-	    // var yScale2 = d3.scale.linear().domain(gpaExtent).range([470, 30]);
-	     
-	    // var xAxis = d3.svg.axis().scale(xScale);
-	    // var yAxis = d3.svg.axis().scale(yScale);
-	  
-	    // var xAxis2 = d3.svg.axis().scale(xScale2);
-	    // var yAxis2 = d3.svg.axis().scale(yScale2);
-	    
-	    // yAxis.orient("left");
-	    // yAxis2.orient("left");
+    d3.select(graph)
+        .append('p')
+        .append('button')
+        .text('Reset Filter')
+        .on('click', function() {
+            bars.selectAll('.bar')
+                .transition()
+                .duration(function(d) {
+                    return Math.random() * 1000;
+                })
+                .delay(function(d) {
+                    return d.frequency * 8000
+                })
+                .style('fill', 'steelblue')
+                .attr('width', function(d) {
+                    return xScale(d.frequency);
+                });
+        });
 
-	 
-	    // var chart1 = d3.select("#chart1")
-		//                 .append("svg:svg")
-		//                 .attr("width",width)
-		//                 .attr("height",height);
+    var data = ["red", "green", "yellow"];
+    var select = d3.select(graph)
+    .append('p')
+    .append('select')
+    .attr('class','select')
+    .on('change',onchange)
+  
+  var options = select
+    .selectAll('option')
+      .data(data).enter()
+      .append('option')
+          .text(function (d) { return d; });
+  
+  function onchange() {
+      selectValue = d3.select('select').property('value')
+      color = selectValue;
+  };
+
+  d3.select(graph)
+  .append('p')
+  .append('text')
+  .text('Cutoff Value')
+  var cutoff = d3.select(graph)
+        .append('p')
+        .append('input')
+        .attr('type','text')
+        .attr('name','textInput')
+        .attr('value','0.05')
 
 
-	    // var chart2 = d3.select("#chart2")
-		//                 .append("svg:svg")
-		//                 .attr("width",width)
-		// 				.attr("height",height);
-						
+    // D3 will grab all the data from "data.csv" and make it available
+    // to us in a callback function. It follows the form:
+    // 
+    // d3.csv('file_name.csv', accumulator, callback)
+    // 
+    // Where 'file_name.csv' - the name of the file to read
+    // accumulator - a method with parameter d that lets you pre-process
+    //               each row in the CSV. This affects the array of
+    //               rows in the function named 'callback'
+    //
+    // callback - a method with parameters error, data. Error contains
+    //            an error message if the data could not be found, or
+    //            was malformed. The 'data' parameter is an array of
+    //            rows returned after being processed by the accumulator.
+    d3.csv('data.csv', function(d) {
+        d.frequency = +d.frequency;
+        return d;
+    }, function(error, data) {
+        // We now have the "massaged" CSV data in the 'data' variable.
+        
+        // We set the domain of the xScale. The domain includes 0 up to
+        // the maximum frequency in the dataset. This is because 
+        xScale.domain([0, d3.max(data, function(d) {
+            return d.frequency;
+        })]);
 
+        // We set the domain of the yScale. The scale is ordinal, and
+        // contains every letter in the alphabet (the letter attribute
+        // in our data array). We can use the map function to iterate
+        // through each value in our data array, and make a new array
+        // that contains just letters.
+        yScale.domain(data.map(function(d) {
+            return d.letter;
+        }));
 
-		//  /******************************************
-			
-		// 	ADD BRUSHING CODE HERE
+        // Append the y-axis to the graph. the translate(20, 0) stuff
+        // shifts the axis 20 pixels from the left. This just helps us
+        // position stuff to where we want it to be.
+        bars.append('g')
+            .attr('class', 'y axis')
+            .attr('transform', 'translate(20, 0)')
+            // Call is a special method that lets us invoke a function
+            // (called 'yAxis' in this case) which creates the actual
+            // yAxis using D3.
+            .call(yAxis);
 
-		//  ******************************************/
-		
-        // var brush1 = d3.svg.brush()
-		// 	.extent([[0, 0],[width, height]]);
+        // Create the bars in the graph. First, select all '.bars' that
+        // currently exist, then load the data into them. enter() selects
+        // all the pieces of data and lets us operate on them.
+        bars.append('g')
+            .selectAll('.bar')
+            .data(data)
+            .enter()
+            .append('rect')
+            .attr('class', 'bar')
+            .attr('x', 30)
+            .attr('y', function(d) {
+                return yScale(d.letter);
+            })
+            .attr('width', function(d) {
+                // xScale will map any number and return a number
+                // within the output range we specified earlier.
+                return xScale(d.frequency);
+            })
+            .attr('height', function(d) {
+                // Remember how we set the yScale to be an ordinal scale
+                // with bands from 0 to height? And then we set the domain 
+                // to contain all the letters in the alphabet? 
+                return yScale.rangeBand();
+            });
+    });
 
-		// var brush2 = d3.svg.brush()
-		// 	.extent([[0, 0],[width, height]]);
-			
-        // brushX = d3.scale.linear().range([0, width]),
-        // brushY = d3.scale.linear().range([0, height]);
-		// brush1.x(brushX).y(brushY);
-		// brush2.x(brushX).y(brushY);
-
-        // chart1.append("g")
-        //     .attr("class", "brush")
-		// 	.call(brush1);
-			
-		// chart2.append("g")
-		// 	.attr("class", "brush")
-		// 	.call(brush2);
-
-        // brush1
-        //     .on("brushstart", brush1start)   
-        //     .on("brush", brushing1)
-        //     .on("brushend", brushend);
-
-		// brush2
-        //     .on("brushstart", brush2start)
-        //     .on("brush", brushing2)
-        //     .on("brushend", brushend);
-
-        // function brush1start() {
-		// 	// 
-			
-        // }
-
-        // function brushing1() {
-		// 	chart2.selectAll("g.brush").call(brush2.clear());
-		// 	var e = brush1.extent();
-                    
-        //     chart1.selectAll('circle').classed("brushed1", function(d) {
-		// 		return e[0][0] <= brushX.invert(xScale(d.SATM)) && brushX.invert(xScale(d.SATM)) <= e[1][0] &&
-        //             e[0][1] <= brushY.invert(yScale(d.SATV)) && brushY.invert(yScale(d.SATV)) <= e[1][1];
-		// 	});
-        //     brushed_idx = chart1.selectAll("circle.brushed1").data();
-        //     chart2.selectAll("circle").classed("brushed2", function(d) {
-        //         return brushed_idx.includes(d);
-        //     });
-		// }
-
-		// function brush2start() {
-		// 	// 
-        // }
-
-		// function brushing2() {
-		// 	chart1.selectAll("g.brush").call(brush1.clear());   
-		// 	var e = brush2.extent();        
-        //     chart2.selectAll('circle').classed("brushed2", function(d) {
-		// 		return e[0][0] <= brushX.invert(xScale2(d.ACT)) && brushX.invert(xScale2(d.ACT)) <= e[1][0] &&
-        //             e[0][1] <= brushY.invert(yScale2(d.GPA)) && brushY.invert(yScale2(d.GPA)) <= e[1][1];
-		// 	});
-		
-        //     brushed_idx = chart2.selectAll("circle.brushed2").data();
-
-        //     chart1.selectAll("circle").classed("brushed1", function(d) {
-        //         return brushed_idx.includes(d);
-        //     });
-        // }
-
-        // function brushend() {
-        //     // update after brusing is finished
-        // }
-
-		// var clickID1 = "";
-		// var temp1= chart1.selectAll("circle")
-		//    .data(csv)
-		//    .enter()
-		//    .append("circle")
-		//    .attr("id",function(d,i) {return "id" + i;} )
-		//    .attr("stroke", "black")
-		//    .attr("cx", function(d) { return xScale(d.SATM); })
-		//    .attr("cy", function(d) { return yScale(d.SATV); })
-		//    .attr("r", 5)
-		//    .on("click", function(d,i){ 
-		// 		d3.select("#chart3").select("#satm").text(d.SATM);
-		// 		d3.select("#chart3").select("#satv").text(d.SATV);
-		// 		d3.select("#chart3").select("#act").text(d.ACT);
-		// 		d3.select("#chart3").select("#gpa").text(d.GPA);
-		// 		d3.selectAll("circle").attr("fill",  "black");
-		// 		var ID = "#" + this.id;
-		// 		chart2.select(ID).attr("fill", "yellow");				
-        //    });
-	  
-
-		// var clickID2 = "";
-	    // var temp2= chart2.selectAll("circle")
-		//    .data(csv)
-		//    .enter()
-		//    .append("circle")
-		//    .attr("id",function(d,i) {return "id" + i;} )
-		//    .attr("stroke", "black")
-		//    .attr("cx", function(d) { return xScale2(d.ACT); })
-		//    .attr("cy", function(d) { return yScale2(d.GPA); })
-		//    .attr("r", 5)
-		//    .on("click", function(d,i){
-		// 		d3.select("#chart3").select("#satm").text(d.SATM);
-		// 		d3.select("#chart3").select("#satv").text(d.SATV);
-		// 		d3.select("#chart3").select("#act").text(d.ACT);
-		// 		d3.select("#chart3").select("#gpa").text(d.GPA);
-		// 		d3.selectAll("circle").attr("fill",  "black");
-		// 		var ID = "#" + this.id;
-		// 		chart1.select(ID).attr("fill", "yellow");
-        //    });
-            
-    
-	    
-	    // chart1 // or something else that selects the SVG element in your visualizations
-		// 	.append("g") // create a group node
-		// 	.attr("transform", "translate(0,"+ (width -30)+ ")")
-		// 	.call(xAxis) // call the axis generator
-		// 	.append("text")
-		// 	.attr("class", "label")
-		// 	.attr("x", width-16)
-		// 	.attr("y", -6)
-		// 	.style("text-anchor", "end")
-		// 	.text("SATM");
-
-	    // chart1 // or something else that selects the SVG element in your visualizations
-		// 	.append("g") // create a group node
-		// 	.attr("transform", "translate(50, 0)")
-		// 	.call(yAxis)
-		// 	.append("text")
-		// 	.attr("class", "label")
-		// 	.attr("transform", "rotate(-90)")
-		// 	.attr("y", 6)
-		// 	.attr("dy", ".71em")
-		// 	.style("text-anchor", "end")
-		// 	.text("SATV");
-
-	    // chart2 // or something else that selects the SVG element in your visualizations
-		// 	.append("g") // create a group node
-		// 	.attr("transform", "translate(0,"+ (width -30)+ ")")
-		// 	.call(xAxis2)
-		// 	.append("text")
-		// 	.attr("class", "label")
-		// 	.attr("x", width-16)
-		// 	.attr("y", -6)
-		// 	.style("text-anchor", "end")
-		// 	.text("ACT");
-
-	    // chart2 // or something else that selects the SVG element in your visualizations
-		// 	.append("g") // create a group node
-		// 	.attr("transform", "translate(50, 0)")
-		// 	.call(yAxis2)
-		// 	.append("text")
-		// 	.attr("class", "label")
-		// 	.attr("transform", "rotate(-90)")
-		// 	.attr("y", 6)
-		// 	.attr("dy", ".71em")
-		// 	.style("text-anchor", "end")
-		// 	.text("GPA");
-	   
+					
      });
 
 
