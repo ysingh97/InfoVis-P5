@@ -90,13 +90,13 @@ d3.csv("movies.csv", function(error, data) {
 			data[i].movie_title = data[i].movie_title;
 			data[i].gross = Number(data[i].gross);
 	    }
+			data = data.filter(function(d) { return d.gross >= 300000000; });
 	    var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	    var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
 var x = d3.scale.ordinal().rangeBands([0, width]).domain(data.map(function(d) { return d.movie_title; }));
-console.log(x.domain());
 
-var y = d3.scale.linear().range([0, height]).domain([0, d3.max(data, function(d) { return d.gross; })]);
+var y = d3.scale.linear().range([height, 0]).domain([0, d3.max(data, function(d) { return d.gross; })]);
 
 var yAxis = d3.svg.axis()
     .scale(y)
@@ -147,14 +147,14 @@ function onchange() {
 
   svg.selectAll("bar")
       .data(data)
-    .enter().append("rect")
+	    .enter().append("rect")
+			.filter(function(d) { return d.gross >= 300000000; })
       .style("fill", "steelblue")
       .attr("x", function(d) {  return x(d.movie_title); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.gross); })
-      .attr("height", function(d) { return height - y(d.gross); });
-
-});
+      .attr("height", function(d) { return height - y(d.gross); })
+	});
 
 
   d3.csv("movies.csv", function(csv) {
