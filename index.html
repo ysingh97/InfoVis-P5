@@ -93,7 +93,8 @@ d3.csv("movies.csv", function(error, data) {
 	    var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	    var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
-var x = d3.scale.ordinal().rangeRoundBands([0, width], .05).domain(data.map(function(d) { return d.movie_title; }));
+var x = d3.scale.ordinal().rangeBands([0, width]).domain(data.map(function(d) { return d.movie_title; }));
+console.log(x.domain());
 
 var y = d3.scale.linear().range([0, height]).domain([0, d3.max(data, function(d) { return d.gross; })]);
 
@@ -123,8 +124,6 @@ function onchange() {
 		.append('p')
 		.text(selectValue + ' is the last selected option.')
 };
-
-//console.log(x.domain());
 
   svg.append("g")
       .attr("class", "x axis")
