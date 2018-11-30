@@ -148,7 +148,7 @@ function onchange() {
       .data(data)
     .enter().append("rect")
       .style("fill", "steelblue")
-      .attr("x", function(d) { console.log (x(d.movie_title)); return x(d.movie_title); })
+      .attr("x", function(d) {  return x(d.movie_title); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.gross); })
       .attr("height", function(d) { return height - y(d.gross); });
