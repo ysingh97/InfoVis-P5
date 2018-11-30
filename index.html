@@ -54,6 +54,20 @@
 	circle.brushed2 {
 		fill:green;
 	}
+	.bar {
+  fill: steelblue;
+}
+	.bar:hover {
+  fill: orangered ;
+}
+ .circle {
+  stroke: black;
+	fill: steelblue;
+}
+	.circle:hover {
+  stroke: orangered ;
+	fill: orangered ;
+}
 
 	.d3-tip {
   line-height: 1;
@@ -124,7 +138,7 @@ d3.csv("movies.csv", function(error, data) {
 			data[i].actor_2_name = data[i].actor_2_name;
 			data[i].actor_3_name = data[i].actor_3_name;
 	    }
-			data = data.filter(function(d) { return d.gross >= 300000000; });
+			data = data.filter(function(d) { return d.gross >= 180000000; });
 	    var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	    var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
@@ -192,11 +206,10 @@ var tip = d3.tip()
   })
 	svg.call(tip);
 
-  svg.selectAll("bar")
+  svg.selectAll(".bar")
       .data(data)
 	    .enter().append("rect")
-			.filter(function(d) { return d.gross >= 300000000; })
-      .style("fill", "steelblue")
+			.attr("class", "bar")
       .attr("x", function(d) {  return x(d.movie_title); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.gross); })
@@ -282,8 +295,8 @@ var tip = d3.tip()
 		   .data(csv)
 		   .enter()
 		   .append("circle")
+			 .attr("class", "circle")
 		   .attr("id",function(d,i) {return "id" + i;} )
-		   .attr("stroke", "black")
 		   .attr("cx", function(d) {
 			   	// console.log(d.budget);
 				// console.log(budgetXScale(d.budget)); 
@@ -300,8 +313,8 @@ var tip = d3.tip()
 		   .data(csv)
 		   .enter()
 		   .append("circle")
+			 .attr("class", "circle")
 		   .attr("id",function(d,i) {return "id" + i;} )
-		   .attr("stroke", "black")
 		   .attr("cx", function(d) { return actor1Scale(d.actor_1_facebook_likes); })
 		   .attr("cy", function(d) { return grossYScale(d.gross); })
 		   .attr("r", 5)
