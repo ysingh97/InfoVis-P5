@@ -192,9 +192,9 @@ function onchange() {
 		var budgetExtent = d3.extent(csv, function(row) { return row.budget });
 		var actor1Extent = d3.extent(csv, function(row) { return row.actor_1_facebook_likes });
 		// console.log(budgetExtent);
-		var budgetXScale = d3.scale.linear().domain(budgetExtent).range([50, 900]);
-		var grossYScale = d3.scale.linear().domain(grossExtent).range([370, 0]);
-		var actor1Scale = d3.scale.linear().domain(actor1Extent).range([50, 900]);
+		var budgetXScale = d3.scale.linear().domain(budgetExtent).range([90, 900]);
+		var grossYScale = d3.scale.linear().domain(grossExtent).range([370, 20]);
+		var actor1Scale = d3.scale.linear().domain(actor1Extent).range([90, 900]);
 
 		var budgetXAxis = d3.svg.axis().scale(budgetXScale);
 		var grossYAxis = d3.svg.axis().scale(grossYScale);
@@ -254,7 +254,7 @@ function onchange() {
 
 	    chart1 // or something else that selects the SVG element in your visualizations
 			.append("g") // create a group node
-			.attr("transform", "translate(50, 0)")
+			.attr("transform", "translate(90, 0)")
 			.call(grossYAxis)
 			.append("text")
 			.attr("class", "label")
@@ -277,7 +277,7 @@ function onchange() {
 
 	    chart2 // or something else that selects the SVG element in your visualizations
 			.append("g") // create a group node
-			.attr("transform", "translate(50, 0)")
+			.attr("transform", "translate(90, 0)")
 			.call(grossYAxis)
 			.append("text")
 			.attr("class", "label")
