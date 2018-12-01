@@ -216,6 +216,7 @@ d3.csv("movies.csv", function(error, data) {
 		.append('input')
 		.attr('type','checkbox')
 		.attr('id','checkbox')
+		.property('checked', 'true')
 		.on("change",update);
 	d3.select('#barchart')
 	.append('text')
