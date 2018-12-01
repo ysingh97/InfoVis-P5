@@ -79,8 +79,8 @@
 	}
 	#barchart {
 		float:left;
-		overflow: auto;
-		height:60%;
+		overflow: scroll;
+		height:900px;
 		width:45%;
 		clear:left;
 	}
@@ -290,9 +290,9 @@ d3.csv("movies.csv", function(error, data) {
 	svg.call(tip);
 
 
-	var scatterMargin = {top: 0, right: 0, bottom: 0, left: 0};
-	var scatterWidth = 700 - scatterMargin.left - scatterMargin.right;
-	var scatterHeight = 800 - scatterMargin.top - scatterMargin.bottom;
+	// var scatterMargin = {top: 0, right: 0, bottom: 0, left: 0};
+	var scatterWidth = 700;
+	var scatterHeight = 750;
 
 	var grossExtent = d3.extent(data, function(row) { return row.gross });
 	var budgetExtent = d3.extent(data, function(row) { return row.budget });
@@ -313,13 +313,13 @@ d3.csv("movies.csv", function(error, data) {
 	var chart1 = d3.select("#chart1")
 		.append("svg:svg")
 		.attr("width",scatterWidth + 20)
-		.attr("height",scatterHeight * .57);
+		.attr("height",scatterHeight * .56);
 
 
 	var chart2 = d3.select("#chart2")
 		.append("svg:svg")
 		.attr("width",scatterWidth + 20)
-		.attr("height",scatterHeight * .57);
+		.attr("height",scatterHeight * .56);
 
 	var brush1 = d3.svg.brush()
 		.extent([[0, 0],[scatterWidth, scatterHeight]]);
@@ -400,13 +400,24 @@ d3.csv("movies.csv", function(error, data) {
 		.append('select')
 		.attr('class','select')
 		.attr('id', 'plot1XSelect')
-		.on('change', onchange1X);
+		.on('change', onchange1X)
+		.text("Plot 1 X Variable");
+
+	var plot1XSelectLabel = d3.select('#chart1')
+		.append('label')
+		.attr('for', 'plot1XSelect')
+		.text('Plot 1 X Variable')
 
 	var plot1YSelect = d3.select('#chart1')
 		.append('select')
 		.attr('class','select')
 		.attr('id', 'plot1YSelect')
 		.on('change', onchange1Y);
+	
+	var plot1YSelectLabel = d3.select('#chart1')
+		.append('label')
+		.attr('for', 'plot1XSelect')
+		.text('Plot 1 Y Variable');
 
 	var plot2XSelect = d3.select('#chart2')
 		.append('select')
@@ -414,11 +425,23 @@ d3.csv("movies.csv", function(error, data) {
 		.attr('id', 'plot2XSelect')
 		.on('change', onchange2X);
 
+	var plot2XSelectLabel = d3.select('#chart2')
+		.append('label')
+		.attr('for', 'plot2XSelect')
+		.text('Plot 2 X Variable');
+
 	var plot2YSelect = d3.select('#chart2')
 		.append('select')
 		.attr('class','select')
 		.attr('id', 'plot2YSelect')
 		.on('change', onchange2Y);
+
+	var plot2YSelectLabel = d3.select('#chart2')
+		.append('label')
+		.attr('for', 'plot2YSelect')
+		.text('Plot 2 Y Variable');
+
+	
 
 	var plot1XOptions = plot1XSelect
 			.selectAll('option')
@@ -443,6 +466,7 @@ d3.csv("movies.csv", function(error, data) {
 		.data(['gross', 'budget', 'actor_1_facebook_likes', 'actor_2_facebook_likes', 'actor_3_facebook_likes', 'director_facebook_likes', 'cast_total_facebook_likes', 'movie_facebook_likes', 'imdb_score', 'num_user_for_reviews', 'gross']).enter()
 		.append('option')
 			.text(function (d) { return d; });
+
 
 	var clickID1 = "";
 	var temp1= chart1.selectAll("circle")
@@ -490,21 +514,21 @@ d3.csv("movies.csv", function(error, data) {
 
 	
 	chart1 // or something else that selects the SVG element in your visualizations
-			.append("g") // create a group node
-			.attr("transform", "translate(0,"+ (width - 30)+ ")")
-			.attr("id", "chart1XAxis")
-			.call(chart1XAxis) // call the axis generator
-			.append("text")
-			.attr("class", "label")
-			.attr("id", "chart1XAxisLabel")
-			.attr("x", width-16)
-			.attr("y", -6)
-			.style("text-anchor", "end")
-			.text("Budget");
+		.append("g") // create a group node
+		.attr("transform", "translate(0,"+ (400)+ ")")
+		.attr("id", "chart1XAxis")
+		.call(chart1XAxis) // call the axis generator
+		.append("text")
+		.attr("class", "label")
+		.attr("id", "chart1XAxisLabel")
+		.attr("x", width-16)
+		.attr("y", -6)
+		.style("text-anchor", "end")
+		.text("Budget");
 
 	chart1 // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
-		.attr("transform", "translate(50, 0)")
+		.attr("transform", "translate(80, 0)")
 		.attr("id", "chart1YAxis")
 		.call(chart1YAxis)
 		.append("text")
@@ -518,11 +542,10 @@ d3.csv("movies.csv", function(error, data) {
 
 	chart2 // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
-		.attr("transform", "translate(0,"+ (width -30)+ ")")
+		.attr("transform", "translate(0,"+ 400+ ")")
 		.attr("id", "chart2XAxis")
 		.call(chart2XAxis)
 		.append("text")
-		.attr("transform", "rotate(-90)")
 		.attr("class", "label")
 		.attr("id", "chart2XAxisLabel")
 		.attr("x", width-16)
@@ -532,7 +555,7 @@ d3.csv("movies.csv", function(error, data) {
 
 	chart2 // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
-		.attr("transform", "translate(50, 0)")
+		.attr("transform", "translate(80, 0)")
 		.attr("id", "chart2YAxis")
 		.call(chart2YAxis)
 		.append("text")
