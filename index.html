@@ -571,7 +571,7 @@ d3.csv("movies.csv", function(error, data) {
 		selectValue = d3.select('#plot1XSelect').property('value');
 		var extent = d3.extent(data, function(row) { 
 			return row[selectValue] });
-		chart1XScale = d3.scale.linear().domain(extent).range([50, 900]);
+		chart1XScale = d3.scale.linear().domain(extent).range([90, 900]);
 		chart1XAxis.scale(chart1XScale);
 		d3.select('#chart1XAxis')
 			.transition().duration(1000)
@@ -606,7 +606,7 @@ d3.csv("movies.csv", function(error, data) {
 		selectValue = d3.select('#plot2XSelect').property('value');
 		var extent = d3.extent(data, function(row) { 
 			return row[selectValue] });
-		chart2XScale = d3.scale.linear().domain(extent).range([50, 900]);
+		chart2XScale = d3.scale.linear().domain(extent).range([90, 900]);
 		chart2XAxis.scale(chart2XScale);
 		d3.select('#chart2XAxis')
 			.transition().duration(1000)
