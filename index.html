@@ -180,7 +180,9 @@ var cutoff = d3.select('#barchart')
 	function refilter(){
 		console.log("click");
 		var value = Number(cutoff.property("value"));
-		makebarChart(data.filter(function(d) { return d.gross >= value; }));
+		var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+		bardata = bardata.filter(function(d) { return d.gross >= value; })
+		makebarChart(bardata);
 	}
 
 	var actorSelect = d3.select('#barchart')
@@ -202,6 +204,7 @@ var svg = d3.select("#barchart").append("svg")
 		  "translate(140,40)");
 
 	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+	bardata = bardata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
 	makebarChart(bardata);
 
 
@@ -217,6 +220,7 @@ var svg = d3.select("#barchart").append("svg")
 		var selectedActor = d3.select('#actorselect').property('value')
 		console.log(selectedActor)
 		var newdata = data.filter(function(d) { return d.actor_1_name == selectedActor || d.actor_2_name == selectedActor || d.actor_3_name == selectedActor; });
+		newdata = newdata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
 		makebarChart(newdata);
 		actorPicked.text(" Current Actor: " + selectedActor);
 	};
