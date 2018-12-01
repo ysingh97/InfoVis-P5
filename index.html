@@ -56,6 +56,7 @@
 	}
 	.bar {
   		fill: steelblue;
+		stroke: black;
 	}
 	.bar:hover {
   		fill: orangered ;
@@ -79,13 +80,15 @@
 	#barchart {
 		float:left;
 		overflow: auto;
-		height:1000px;
-		width:50%;		
+		height:60%;
+		width:45%;
+		clear:left;
 	}
 	#scatterPlots {
 		float:right;
-		/* width:50%; */
-	} */
+		clear:right;
+		width:45%;
+	}
 
 	/* Creates a small triangle extender for the tooltip */
 	.d3-tip:after {
@@ -122,27 +125,10 @@
 
 var margin = {top: 100, right: 20, bottom: 100, left: 250};
 var width = 700 - margin.left - margin.right;
-var height = 950 - margin.top - margin.bottom;
+var height = 800 - margin.top - margin.bottom;
 
-var svg = d3.select("#barchart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  	.append("g")
-    .attr("transform", 
-		  "translate(" + margin.left + "," + margin.top + ")");
-
-d3.select('#barchart')
-	.append('p')
-	.append('text')
-	.text('Cutoff Value')
-var cutoff = d3.select('#barchart')
-	.append('p')
-	.append('input')
-	.attr('type','text')
-	.attr('name','textInput')
-	.attr('value','190000000')
 d3.csv("movies.csv", function(error, data) {
-
+	var actors = new Array();
    for (var i=0; i<data.length; ++i) {
 		data[i].movie_title = data[i].movie_title;
 		data[i].gross = Number(data[i].gross);
@@ -162,37 +148,76 @@ d3.csv("movies.csv", function(error, data) {
 		data[i].actor_2_facebook_likes = Number(data[i].actor_2_facebook_likes);
 		data[i].imdb_score = Number(data[i].imdb_score);
 		data[i].movie_facebook_likes = Number(data[i].movie_facebook_likes);
+
+		if(actors.indexOf(data[i].actor_1_name) == -1)
+			actors.push(data[i].actor_1_name);
 	}
-	var value = cutoff.property("value");
+	//var value = cutoff.property("value");
 	data.sort(function(x, y){
 		return d3.descending(x.gross, y.gross);
 	});
-	var actors = data.map(function(d) { return d.actor_1_name; });
+	//var actors = data.map(function(d) { return d.actor_1_name; });
 	var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
-	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
-	makebarChart(bardata);
+
+	//var actors = data.map(function(d) { return d.actor_1_name; });
+	var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
+	var grossExtent = d3.extent(data, function(row) { return row.gross; });
+
+	d3.select('#barchart')
+		.append('p')
+		.append('text')
+		.text('Box Office Gross Cutoff Value')
+	var cutoff = d3.select('#barchart')
+		.append('p')
+		.append('input')
+		.attr('type','text')
+		.attr('name','textInput')
+		.attr('value','0')
+
+	var value = cutoff.property("value");
 
 	d3.select('#barchart')
 		.append('p')
 		.append('button')
-		.text('Filter Data')
+		.text('Filter Gross')
 		.on('click',refilter);
 
 	function refilter(){
 		console.log("click");
 		var value = Number(cutoff.property("value"));
-		makebarChart(data.filter(function(d) { return d.gross >= value; }));
+		var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+		bardata = bardata.filter(function(d) { return d.gross >= value; })
+		makebarChart(bardata);
 	}
 
 	var actorSelect = d3.select('#barchart')
   		.append('select')
 		.attr('class','select')
 		.attr('id', 'actorselect')
-		.on('change',onchange)
+		.on('change',onchange);
 
-	actors = actors.sort(d3.descending);
+	var actorPicked = d3.select('#barchart')
+				.append('text')
+				.text(" Current Actor: Channing Tatum");
+
+	var svg = d3.select("#barchart").append("svg")
+		.attr("width", width)
+			.attr("height", height)
+			.attr("id","barsvg")
+		.append("g")
+		.attr("transform", 
+			"translate(140,40)");
+
+	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+	bardata = bardata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
+	makebarChart(bardata);
+
+
+	actors = actors.sort(d3.ascending);
+		//Removes the blank actor name
+		actors.shift();
 	var options = actorSelect.selectAll('option')
 		.data(actors).enter()
 		.append('option')
@@ -202,19 +227,130 @@ d3.csv("movies.csv", function(error, data) {
 		var selectedActor = d3.select('#actorselect').property('value')
 		console.log(selectedActor)
 		var newdata = data.filter(function(d) { return d.actor_1_name == selectedActor || d.actor_2_name == selectedActor || d.actor_3_name == selectedActor; });
+		newdata = newdata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
 		makebarChart(newdata);
+		actorPicked.text(" Current Actor: " + selectedActor);
 	};
+
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d) {
+		return "<strong>Title:</strong> <span style='color:red'>" + d.movie_title 
+		+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:red'>$" + d.gross + "</span>"
+		+ "<br></span>"+"<strong>Director:</strong> <span style='color:red'>" + d.director_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:red'>" + d.actor_1_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:red'>" + d.actor_2_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:red'>" + d.actor_3_name + "</span>";
+	});
+	svg.call(tip);
+
+
+	var scatterMargin = {top: 0, right: 0, bottom: 0, left: 0};
+	var scatterWidth = 700 - scatterMargin.left - scatterMargin.right;
+	var scatterHeight = 800 - scatterMargin.top - scatterMargin.bottom;
+
+	var grossExtent = d3.extent(data, function(row) { return row.gross });
+	var budgetExtent = d3.extent(data, function(row) { return row.budget });
+	var actor1Extent = d3.extent(data, function(row) { return row.actor_1_facebook_likes });
+	
+	var chart1XScale = d3.scale.linear().domain(budgetExtent).range([90, 900]);
+	var chart1YScale = d3.scale.linear().domain(grossExtent).range([370, 20]);
+	var chart2XScale = d3.scale.linear().domain(actor1Extent).range([90, 900]);
+	var chart2YScale = d3.scale.linear().domain(grossExtent).range([370, 20]);
+
+	var chart1XAxis = d3.svg.axis().scale(chart1XScale);
+	var chart1YAxis = d3.svg.axis().scale(chart1YScale);
+	var chart2XAxis = d3.svg.axis().scale(chart2XScale);
+	var chart2YAxis = d3.svg.axis().scale(chart2YScale);
+	chart1YAxis.orient("left");
+	chart2YAxis.orient("left");
 
 	var chart1 = d3.select("#chart1")
 		.append("svg:svg")
-		.attr("width",width)
-		.attr("height",height/2);
+		.attr("width",scatterWidth + 20)
+		.attr("height",scatterHeight * .57);
 
 
 	var chart2 = d3.select("#chart2")
 		.append("svg:svg")
-		.attr("width",width)
-		.attr("height",height/2);
+		.attr("width",scatterWidth + 20)
+		.attr("height",scatterHeight * .57);
+
+	var brush1 = d3.svg.brush()
+		.extent([[0, 0],[scatterWidth, scatterHeight]]);
+
+	var brush2 = d3.svg.brush()
+		.extent([[0, 0],[scatterWidth, scatterHeight]]);
+		
+	brushX = d3.scale.linear().range([0, scatterWidth]),
+	brushY = d3.scale.linear().range([0, scatterHeight]);
+	brush1.x(brushX).y(brushY);
+	brush2.x(brushX).y(brushY);
+
+	chart1.append("g")
+		.attr("class", "brush")
+		.call(brush1);
+		
+	chart2.append("g")
+		.attr("class", "brush")
+		.call(brush2);
+
+	brush1
+		.on("brushstart", brush1start)   
+		.on("brush", brushing1)
+		.on("brushend", brushend);
+
+	brush2
+		.on("brushstart", brush2start)
+		.on("brush", brushing2)
+		.on("brushend", brushend);
+
+	function brush1start() {
+		// 
+		
+	}
+
+	function brushing1() {
+		selectValue = d3.select('#plot1XSelect').property('value');
+		selectValueY = d3.select('#plot1YSelect').property('value');
+		chart2.selectAll("g.brush").call(brush2.clear());
+		var e = brush1.extent();
+				
+		chart1.selectAll('circle').classed("brushed1", function(d) {
+			return e[0][0] <= brushX.invert(chart1XScale(d[selectValue])) && brushX.invert(chart1XScale(d[selectValue])) <= e[1][0] &&
+				e[0][1] <= brushY.invert(chart1YScale(d[selectValueY])) && brushY.invert(chart1YScale(d[selectValueY])) <= e[1][1];
+		});
+		brushed_idx = chart1.selectAll("circle.brushed1").data();
+		chart2.selectAll("circle").classed("brushed2", function(d) {
+			return brushed_idx.includes(d);
+		});
+	}
+
+	function brush2start() {
+		// 
+	}
+
+	function brushing2() {
+		selectValue = d3.select('#plot2XSelect').property('value');
+		selectValueY = d3.select('#plot2YSelect').property('value');
+		chart1.selectAll("g.brush").call(brush1.clear());   
+		var e = brush2.extent();        
+		chart2.selectAll('circle').classed("brushed2", function(d) {
+			return e[0][0] <= brushX.invert(chart2XScale(d[selectValue])) && brushX.invert(chart2XScale(d[selectValue])) <= e[1][0] &&
+				e[0][1] <= brushY.invert(chart2YScale(d[selectValueY])) && brushY.invert(chart2YScale(d[selectValueY])) <= e[1][1];
+		});
+	
+		brushed_idx = chart2.selectAll("circle.brushed2").data();
+
+		chart1.selectAll("circle").classed("brushed1", function(d) {
+			return brushed_idx.includes(d);
+		});
+	}
+
+	function brushend() {
+		// update after brusing is finished
+	}
 
 	var plot1XSelect = d3.select('#chart1')
 		.append('select')
@@ -240,58 +376,29 @@ d3.csv("movies.csv", function(error, data) {
 		.attr('id', 'plot2YSelect')
 		.on('change', onchange2Y);
 
-	var grossExtent = d3.extent(data, function(row) { return row.gross });
-	var budgetExtent = d3.extent(data, function(row) { return row.budget });
-	var actor1Extent = d3.extent(data, function(row) { return row.actor_1_facebook_likes });
-	
-	var chart1XScale = d3.scale.linear().domain(budgetExtent).range([90, 900]);
-	var chart1YScale = d3.scale.linear().domain(grossExtent).range([370, 20]);
-	var chart2XScale = d3.scale.linear().domain(actor1Extent).range([90, 900]);
-	var chart2YScale = d3.scale.linear().domain(grossExtent).range([370, 20]);
-
-	var chart1XAxis = d3.svg.axis().scale(chart1XScale);
-	var chart1YAxis = d3.svg.axis().scale(chart1YScale);
-	var chart2XAxis = d3.svg.axis().scale(chart2XScale);
-	var chart2YAxis = d3.svg.axis().scale(chart2YScale);
-	chart1YAxis.orient("left");
-	chart2YAxis.orient("left");
-
 	var plot1XOptions = plot1XSelect
 			.selectAll('option')
-			.data(['budget', 'actor_1_facebook_likes']).enter()
+			.data(['budget', 'actor_1_facebook_likes', 'actor_2_facebook_likes', 'actor_3_facebook_likes', 'director_facebook_likes', 'cast_total_facebook_likes', 'movie_facebook_likes', 'imdb_score', 'num_user_for_reviews', 'gross']).enter()
 			.append('option')
 				.text(function (d) { return d; });
 
 	var plot1YOptions = plot1YSelect
 		.selectAll('option')
-		.data(['budget', 'actor_1_facebook_likes']).enter()
+		.data(['gross', 'budget', 'actor_1_facebook_likes', 'actor_2_facebook_likes', 'actor_3_facebook_likes', 'director_facebook_likes', 'cast_total_facebook_likes', 'movie_facebook_likes', 'imdb_score', 'num_user_for_reviews', 'gross']).enter()
 		.append('option')
 			.text(function (d) { return d; });
 
 	var plot2XOptions = plot2XSelect
 		.selectAll('option')
-		.data(['budget', 'actor_1_facebook_likes']).enter()
+		.data(['actor_1_facebook_likes', 'budget', 'actor_2_facebook_likes', 'actor_3_facebook_likes', 'director_facebook_likes', 'cast_total_facebook_likes', 'movie_facebook_likes', 'imdb_score', 'num_user_for_reviews', 'gross']).enter()
 		.append('option')
 			.text(function (d) { return d; });
 
 	var plot2YOptions = plot2YSelect
 		.selectAll('option')
-		.data(['budget', 'actor_1_facebook_likes']).enter()
+		.data(['gross', 'budget', 'actor_1_facebook_likes', 'actor_2_facebook_likes', 'actor_3_facebook_likes', 'director_facebook_likes', 'cast_total_facebook_likes', 'movie_facebook_likes', 'imdb_score', 'num_user_for_reviews', 'gross']).enter()
 		.append('option')
 			.text(function (d) { return d; });
-
-	var tip = d3.tip()
-	.attr('class', 'd3-tip')
-	.offset([-10, 0])
-	.html(function(d) {
-		return "<strong>Title:</strong> <span style='color:red'>" + d.movie_title 
-		+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:red'>$" + d.gross + "</span>"
-		+ "<br></span>"+"<strong>Director:</strong> <span style='color:red'>" + d.director_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:red'>" + d.actor_1_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:red'>" + d.actor_2_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:red'>" + d.actor_3_name + "</span>";
-	});
-	svg.call(tip);
 
 	var clickID1 = "";
 	var temp1= chart1.selectAll("circle")
@@ -310,7 +417,10 @@ d3.csv("movies.csv", function(error, data) {
 			}
 		})
 		.on('mouseover', tip.show)
-		.on('mouseout', tip.hide);
+		.on('mouseout', tip.hide)
+		.on("click", function(d, i) {
+			d3.selectAll("circle").attr("fill", "blue");
+		});
 
 	var clickID2 = "";
 	var temp2= chart2.selectAll("circle")
@@ -329,12 +439,15 @@ d3.csv("movies.csv", function(error, data) {
 			}
 		})
 		.on('mouseover', tip.show)
-		.on('mouseout', tip.hide);           
+		.on('mouseout', tip.hide)
+		.on("click", function(d, i) {
+			d3.selectAll("circle").attr("fill", "blue");
+		});     
 
 	
 	chart1 // or something else that selects the SVG element in your visualizations
 			.append("g") // create a group node
-			.attr("transform", "translate(0,"+ (width -30)+ ")")
+			.attr("transform", "translate(0,"+ (width - 30)+ ")")
 			.attr("id", "chart1XAxis")
 			.call(chart1XAxis) // call the axis generator
 			.append("text")
@@ -365,12 +478,13 @@ d3.csv("movies.csv", function(error, data) {
 		.attr("id", "chart2XAxis")
 		.call(chart2XAxis)
 		.append("text")
+		.attr("transform", "rotate(-90)")
 		.attr("class", "label")
 		.attr("id", "chart2XAxisLabel")
 		.attr("x", width-16)
 		.attr("y", -6)
 		.style("text-anchor", "end")
-		.text("Actor 1 Facebook Likes");
+		.text("actor_1_facebook_likes");
 
 	chart2 // or something else that selects the SVG element in your visualizations
 		.append("g") // create a group node
@@ -408,7 +522,7 @@ d3.csv("movies.csv", function(error, data) {
 		selectValue = d3.select('#plot1YSelect').property('value');
 		var extent = d3.extent(data, function(row) { 
 			return row[selectValue] });
-		chart1YScale = d3.scale.linear().domain(extent).range([50, 900]);
+		chart1YScale = d3.scale.linear().domain(extent).range([370,20]);
 		chart1YAxis.scale(chart1YScale);
 		d3.select('#chart1YAxis')
 			.transition().duration(1000)
@@ -441,7 +555,7 @@ d3.csv("movies.csv", function(error, data) {
 		selectValue = d3.select('#plot2YSelect').property('value');
 		var extent = d3.extent(data, function(row) { 
 			return row[selectValue] });
-		chart2YScale = d3.scale.linear().domain(extent).range([50, 900]);
+		chart2YScale = d3.scale.linear().domain(extent).range([370, 20]);
 		chart2YAxis.scale(chart2YScale);
 		d3.select('#chart2YAxis')
 			.transition().duration(1000)
@@ -459,24 +573,23 @@ d3.csv("movies.csv", function(error, data) {
 		svg.select("#yaxis").remove();
 		svg.select("#barchart").remove();
 		
-
-		var y = d3.scale.ordinal().rangeBands([0, height]).domain(data.map(function(d) { return d.movie_title; }));
-
-		var x = d3.scale.linear().range([0, width]).domain([0, d3.max(data, function(d) { return d.gross; })]);
-
+		var newHeight = data.length * 20 + 120;
+		console.log(newHeight);
+		d3.select("#barchart").select("svg").attr("height", newHeight);
+		d3.select("#barchart").attr("height", newHeight);
+		var y = d3.scale.ordinal().rangeBands([0, newHeight-140]).domain(data.map(function(d) { return d.movie_title; }));
+		var x = d3.scale.linear().range([0, width-145]).domain([0, d3.max(data, function(d) { return d.gross; })]);
 		var xAxis = d3.svg.axis()
 			.scale(x)
 			.orient("bottom")
 			.ticks(10);
-
 		var yAxis = d3.svg.axis()
 			.scale(y)
 			.orient("left");
-
 		svg.append("g")
 			.attr("class", "x axis")
 			.attr("id", "xaxis")
-			.attr("transform", "translate(0," + height + ")")
+			.attr("transform", "translate(0," + (newHeight-140) + ")")
 			.call(xAxis)
 			.selectAll("text")
 			.style("text-anchor", "end")
@@ -487,24 +600,20 @@ d3.csv("movies.csv", function(error, data) {
 			.attr("class", "label")
 			.attr("id", "barChartXLabel")
 			.attr("x", width-10)
-			.attr("y", height - 20)
+			.attr("y", newHeight)
 			.style("text-anchor", "end")
 			.text("Gross");
-
 		svg.append("g")
 			.attr("class", "y axis")
 			.attr("id", "yaxis")
 			.call(yAxis)
 			.append("text")
 			.attr("transform", "rotate(-90)")
-			.attr("y", 6)
+			.attr("y", height)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
 			.text("Value ($)");
-
 		var barchart = svg.append("g").attr("class","barchart").attr("id","barchart");
-
-
 		var tip = d3.tip()
 		.attr('class', 'd3-tip')
 		.offset([-10, 0])
@@ -528,7 +637,6 @@ d3.csv("movies.csv", function(error, data) {
 			.on('mouseover', tip.show)
 			.on('mouseout', tip.hide);
 	}
-
 });
 
   </script>
