@@ -48,26 +48,29 @@
 		shape-rendering: crispEdges;
 	}
 	circle.brushed1 {
-		fill:red;
+		fill:#d64541;
+		stroke: #96281b
 	}
 
 	circle.brushed2 {
-		fill:green;
+		fill:#87d37c;
+		stroke:#1e824c
 	}
 	.bar {
-  		fill: steelblue;
-		stroke: black;
+  		fill: #3498db;
+		stroke: #2c82c9;
 	}
 	.bar:hover {
-  		fill: orangered ;
+  		fill: #f39c12 ;
+			stroke: #ffcb05;
 	}
  	circle {
-  		stroke: black;
-		fill: steelblue;
+		fill: #3498db;
+		stroke: #2c82c9;
 	}
 	circle:hover {
-  		stroke: orangered ;
-		fill: orangered ;
+		fill: #f39c12 ;
+			stroke: #ffcb05;
 	}
 	.d3-tip {
 		line-height: 1;
@@ -216,7 +219,6 @@ d3.csv("movies.csv", function(error, data) {
 		.append('input')
 		.attr('type','checkbox')
 		.attr('id','checkbox')
-		.property('checked', 'true')
 		.on("change",update);
 	d3.select('#barchart')
 	.append('text')
@@ -250,10 +252,8 @@ d3.csv("movies.csv", function(error, data) {
 		.attr("transform", 
 			"translate(140,40)");
 
-	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
-	bardata = bardata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
-	makebarChart(bardata);
-	totalSum.text(" Box Office Sum: $" + formatComma(d3.sum(bardata, function(d){return d.gross;})));
+	makebarChart(data);
+	totalSum.text(" Box Office Sum: $" + formatComma(d3.sum(data, function(d){return d.gross;})));
 
 
 	actors = actors.sort(d3.ascending);
@@ -280,12 +280,12 @@ d3.csv("movies.csv", function(error, data) {
 	.attr('class', 'd3-tip')
 	.offset([-10, 0])
 	.html(function(d) {
-		return "<strong>Title:</strong> <span style='color:red'>" + d.movie_title 
-		+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:red'>$" + d.gross + "</span>"
-		+ "<br></span>"+"<strong>Director:</strong> <span style='color:red'>" + d.director_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:red'>" + d.actor_1_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:red'>" + d.actor_2_name + "</span>"
-		+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:red'>" + d.actor_3_name + "</span>";
+		return "<strong>Title:</strong> <span style='color:#ffcb05'>" + d.movie_title 
+		+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:#ffcb05'>$" + d.gross + "</span>"
+		+ "<br></span>"+"<strong>Director:</strong> <span style='color:#ffcb05'>" + d.director_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:#ffcb05'>" + d.actor_1_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:#ffcb05'>" + d.actor_2_name + "</span>"
+		+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:#ffcb05'>" + d.actor_3_name + "</span>";
 	});
 	svg.call(tip);
 
@@ -685,12 +685,12 @@ d3.csv("movies.csv", function(error, data) {
 		.attr('class', 'd3-tip')
 		.offset([-10, 0])
 		.html(function(d) {
-			return "<strong>Title:</strong> <span style='color:red'>" + d.movie_title 
-				+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:red'>$" + d.gross + "</span>"
-				+ "<br></span>"+"<strong>Director:</strong> <span style='color:red'>" + d.director_name + "</span>"
-				+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:red'>" + d.actor_1_name + "</span>"
-				+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:red'>" + d.actor_2_name + "</span>"
-				+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:red'>" + d.actor_3_name + "</span>";
+			return "<strong>Title:</strong> <span style='color:#ffcb05'>" + d.movie_title 
+				+ "<br></span>"+"<strong>Box office Gross:</strong> <span style='color:#ffcb05'>$" + d.gross + "</span>"
+				+ "<br></span>"+"<strong>Director:</strong> <span style='color:#ffcb05'>" + d.director_name + "</span>"
+				+ "<br></span>"+"<strong>Actor 1:</strong> <span style='color:#ffcb05'>" + d.actor_1_name + "</span>"
+				+ "<br></span>"+"<strong>Actor 2:</strong> <span style='color:#ffcb05'>" + d.actor_2_name + "</span>"
+				+ "<br></span>"+"<strong>Actor 3:</strong> <span style='color:#ffcb05'>" + d.actor_3_name + "</span>";
 		});
 		svg.call(tip);
 		barchart.selectAll(".bar")
