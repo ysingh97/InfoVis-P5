@@ -124,25 +124,8 @@ var margin = {top: 100, right: 20, bottom: 100, left: 250};
 var width = 700 - margin.left - margin.right;
 var height = 950 - margin.top - margin.bottom;
 
-var svg = d3.select("#barchart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  	.append("g")
-    .attr("transform", 
-		  "translate(" + margin.left + "," + margin.top + ")");
-
-d3.select('#barchart')
-	.append('p')
-	.append('text')
-	.text('Cutoff Value')
-var cutoff = d3.select('#barchart')
-	.append('p')
-	.append('input')
-	.attr('type','text')
-	.attr('name','textInput')
-	.attr('value','190000000')
 d3.csv("movies.csv", function(error, data) {
-
+	var actors = new Array();
    for (var i=0; i<data.length; ++i) {
 		data[i].movie_title = data[i].movie_title;
 		data[i].gross = Number(data[i].gross);
@@ -162,22 +145,35 @@ d3.csv("movies.csv", function(error, data) {
 		data[i].actor_2_facebook_likes = Number(data[i].actor_2_facebook_likes);
 		data[i].imdb_score = Number(data[i].imdb_score);
 		data[i].movie_facebook_likes = Number(data[i].movie_facebook_likes);
+
+		if(actors.indexOf(data[i].actor_1_name) == -1)
+			actors.push(data[i].actor_1_name);
 	}
-	var value = cutoff.property("value");
+
 	data.sort(function(x, y){
 		return d3.descending(x.gross, y.gross);
 	});
-	var actors = data.map(function(d) { return d.actor_1_name; });
+	//var actors = data.map(function(d) { return d.actor_1_name; });
 	var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
-	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
-	makebarChart(bardata);
+d3.select('#barchart')
+	.append('p')
+	.append('text')
+	.text('Box Office Gross Cutoff Value')
+var cutoff = d3.select('#barchart')
+	.append('p')
+	.append('input')
+	.attr('type','text')
+	.attr('name','textInput')
+	.attr('value','0')
+	
+	var value = cutoff.property("value");
 
-	d3.select('#barchart')
+		d3.select('#barchart')
 		.append('p')
 		.append('button')
-		.text('Filter Data')
+		.text('Filter Gross')
 		.on('click',refilter);
 
 	function refilter(){
@@ -190,9 +186,27 @@ d3.csv("movies.csv", function(error, data) {
   		.append('select')
 		.attr('class','select')
 		.attr('id', 'actorselect')
-		.on('change',onchange)
+		.on('change',onchange);
 
-	actors = actors.sort(d3.descending);
+var actorPicked = d3.select('#barchart')
+			.append('text')
+			.text(" Current Actor: Channing Tatum");
+
+var svg = d3.select("#barchart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.attr("id","barsvg")
+  	.append("g")
+    .attr("transform", 
+		  "translate(" + margin.left + "," + margin.top + ")");
+
+	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+	makebarChart(bardata);
+
+
+	actors = actors.sort(d3.ascending);
+		//Removes the blank actor name
+		actors.shift();
 	var options = actorSelect.selectAll('option')
 		.data(actors).enter()
 		.append('option')
@@ -203,6 +217,7 @@ d3.csv("movies.csv", function(error, data) {
 		console.log(selectedActor)
 		var newdata = data.filter(function(d) { return d.actor_1_name == selectedActor || d.actor_2_name == selectedActor || d.actor_3_name == selectedActor; });
 		makebarChart(newdata);
+		actorPicked.text(" Current Actor: " + selectedActor);
 	};
 
 	var chart1 = d3.select("#chart1")
@@ -459,8 +474,11 @@ d3.csv("movies.csv", function(error, data) {
 		svg.select("#yaxis").remove();
 		svg.select("#barchart").remove();
 		
-
-		var y = d3.scale.ordinal().rangeBands([0, height]).domain(data.map(function(d) { return d.movie_title; }));
+	 var newHeight = data.length * 20 + 120;
+	 console.log(newHeight);
+	 d3.select("#barchart").select("svg").attr("height", newHeight);
+	 d3.select("#barchart").attr("height", newHeight);
+		var y = d3.scale.ordinal().rangeBands([0, newHeight]).domain(data.map(function(d) { return d.movie_title; }));
 
 		var x = d3.scale.linear().range([0, width]).domain([0, d3.max(data, function(d) { return d.gross; })]);
 
@@ -487,7 +505,7 @@ d3.csv("movies.csv", function(error, data) {
 			.attr("class", "label")
 			.attr("id", "barChartXLabel")
 			.attr("x", width-10)
-			.attr("y", height - 20)
+			.attr("y", height)
 			.style("text-anchor", "end")
 			.text("Gross");
 
@@ -497,7 +515,7 @@ d3.csv("movies.csv", function(error, data) {
 			.call(yAxis)
 			.append("text")
 			.attr("transform", "rotate(-90)")
-			.attr("y", 6)
+			.attr("y", height)
 			.attr("dy", ".71em")
 			.style("text-anchor", "end")
 			.text("Value ($)");
