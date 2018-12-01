@@ -165,6 +165,12 @@ d3.csv("movies.csv", function(error, data) {
 	var titleExtent = d3.extent(data, function(row) { return row.movie_title; });
 	var grossExtent = d3.extent(data, function(row) { return row.gross; });
 
+	var formatComma = d3.format(",");
+
+	var totalSum= d3.select('#barchart')
+		.append('text')
+		.text(" Box Office Sum: $");
+
 	d3.select('#barchart')
 		.append('p')
 		.append('text')
@@ -187,9 +193,11 @@ d3.csv("movies.csv", function(error, data) {
 	function refilter(){
 		console.log("click");
 		var value = Number(cutoff.property("value"));
-		var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
+		var selectedActor = d3.select('#actorselect').property('value')
+		var bardata = data.filter(function(d) { return d.actor_1_name == selectedActor || d.actor_2_name == selectedActor || d.actor_3_name == selectedActor; });
 		bardata = bardata.filter(function(d) { return d.gross >= value; })
 		makebarChart(bardata);
+		totalSum.text(" Box Office Sum: $" + formatComma(d3.sum(bardata, function(d){return d.gross;})));
 	}
 
 	var actorSelect = d3.select('#barchart')
@@ -213,6 +221,7 @@ d3.csv("movies.csv", function(error, data) {
 	var bardata = data.filter(function(d) { return d.actor_1_name == "Channing Tatum" || d.actor_2_name == "Channing Tatum" || d.actor_3_name == "Channing Tatum" })
 	bardata = bardata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
 	makebarChart(bardata);
+	totalSum.text(" Box Office Sum: $" + formatComma(d3.sum(bardata, function(d){return d.gross;})));
 
 
 	actors = actors.sort(d3.ascending);
@@ -230,6 +239,7 @@ d3.csv("movies.csv", function(error, data) {
 		newdata = newdata.filter(function(d) { return d.gross >= Number(cutoff.property("value")); })
 		makebarChart(newdata);
 		actorPicked.text(" Current Actor: " + selectedActor);
+		totalSum.text(" Box Office Sum: $" + formatComma(d3.sum(newdata, function(d){return d.gross;})));
 	};
 
 	var tip = d3.tip()
