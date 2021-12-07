@@ -1,3 +1,3 @@
-P5, project for Information Visualization class.
+# P5: Prooject for Information Visualization class.
 
-We use d3.js to visualize data about movies and actors.
+We use d3.js to visualize data about movies and actors. Please see Report.pdf for our visualizations and conclusions.
